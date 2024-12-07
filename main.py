@@ -21,7 +21,7 @@ def create_chromosome(size):
     return res
 
 
-def mutation(chromosome, mutation_rate=5):
+def mutation(chromosome, mutation_rate=3):
     for i in range(len(chromosome) - 1):
         if random.randint(0, 101)< mutation_rate:
             chromosome[i] = 1 - chromosome[i]  
@@ -51,7 +51,7 @@ def mark_chromosome(chromosome, values = False):
 
 
         #if abs(kkal - norm[0]) <= 500 and abs(b - norm[1]) <= 50 and abs(f - norm[2]) <= 50 and abs(u - norm[3]) <= 250:
-        if abs(kkal - norm[0]) <= 500 and abs(b - norm[1]) <= 50 and abs(cost - 7000) <= 1000:
+        if abs(kkal - norm[0]) <= 500 and abs(b - norm[1]) <= 50 and abs(cost - 8000) <= 1000:
             panteon.append(chromosome)
             mark_chromosome(chromosome, True)
         return chromosome
@@ -61,16 +61,16 @@ def mark_chromosome(chromosome, values = False):
 
 def create_new_gen(chromosomes):
     new_gen = []
-    for i in range(len(chromosomes) - 1):
-        new_gen.append(crossover_one_point(chromosomes[i], chromosomes[i + 1]))
-        new_gen.append(crossover_two_point(chromosomes[i], chromosomes[i + 1]))
+    for i in range(len(chromosomes)):
+        new_gen.append(crossover_one_point(chromosomes[i], chromosomes[i - 1]))
+        new_gen.append(crossover_two_point(chromosomes[i], chromosomes[i - 1]))
 
     for i in range(len(new_gen)):
         new_gen[i] = mark_chromosome(new_gen[i])
         mutation(new_gen[i])
 
     new_gen.sort(key=lambda x: x[-1])
-    return new_gen[:gen_count]
+    return new_gen[:chromosome_count]
 
 
 '''
@@ -159,23 +159,35 @@ products = [
 panteon = []
 
 norm = [18000, 525, 500, 2000]
-gen_count = 150
+gen_count = 75 * 3
+chromosome_count=100
 product_count = 75
 product_count -=1
 chromosomes = []
 generation = 0
 
 
-for i in range(gen_count):
+for i in range(chromosome_count):
     chromosomes.append(create_chromosome(gen_count))
 
 while(len(panteon) < 20):
     generation+=1
-    for i in range(gen_count):
+    for i in range(chromosome_count):
         mark_chromosome(chromosomes[i])
     chromosomes = create_new_gen(chromosomes)
 
 print("\nbimbimbambam\n")
 panteon.sort(key=lambda x: x[-1])
-print(generation)
+print("generation: ", generation)
 mark_chromosome(panteon[0], True)
+
+prod = []
+for i in range(product_count):
+    prod.append([products[i][0], 0])
+    
+for i in range(gen_count):
+    prod[i % product_count][1]+=panteon[0][i]
+
+for i in prod:
+    if i[1] != 0:
+        print(i)
