@@ -1,5 +1,82 @@
 import random
 
+
+def crossover_one_point(parent1, parent2):
+    point = random.randint(1, len(parent1) - 2)
+    child = parent1[:point] + parent2[point:]
+    return child
+
+def crossover_two_point(parent1, parent2):
+    point1 = random.randint(1, len(parent1) // 2)
+    point2 = random.randint(len(parent1) // 2, len(parent1) - 1)
+    child = parent1[:point1] + parent2[point1:point2] + parent1[point2:]
+    return child
+
+
+
+
+def create_chromosome(size):
+    res = [random.randint(0, 1) for _ in range(size)]
+    res.append(float('inf')) 
+    return res
+
+
+def mutation(chromosome, mutation_rate=5):
+    for i in range(len(chromosome) - 1):
+        if random.randint(0, 101)< mutation_rate:
+            chromosome[i] = 1 - chromosome[i]  
+
+#                  
+#     ["Яблоко",50,  52,    0.3, 0.2, 14]
+
+
+def mark_chromosome(chromosome, values = False):
+    kkal, cost, b, f, u = 0, 0, 0, 0,0
+
+    for i in range(len(chromosome)):
+        if chromosome[i] == 1:
+            kkal+=products[i % product_count][2]
+            cost += products[i % product_count][1]
+            b +=  products[i % product_count][3]
+            f += products[i % product_count][4]
+            u +=  products[i % product_count][5]
+    if values == False:
+        chromosome[-1] = (
+    abs(kkal - norm[0]) / norm[0] +
+    abs(b - norm[1]) / norm[1] +
+    abs(cost - 7000) / 7000
+    #abs(f - norm[2]) / norm[2] +
+    #abs(u - norm[3]) / norm[3]
+)
+
+
+        #if abs(kkal - norm[0]) <= 500 and abs(b - norm[1]) <= 50 and abs(f - norm[2]) <= 50 and abs(u - norm[3]) <= 250:
+        if abs(kkal - norm[0]) <= 500 and abs(b - norm[1]) <= 50 and abs(cost - 7000) <= 1000:
+            panteon.append(chromosome)
+            mark_chromosome(chromosome, True)
+        return chromosome
+    else:
+        print(kkal, " :: ", cost, " :: ", b, " :: ", f, " :: ", u)
+
+
+def create_new_gen(chromosomes):
+    new_gen = []
+    for i in range(len(chromosomes) - 1):
+        new_gen.append(crossover_one_point(chromosomes[i], chromosomes[i + 1]))
+        new_gen.append(crossover_two_point(chromosomes[i], chromosomes[i + 1]))
+
+    for i in range(len(new_gen)):
+        new_gen[i] = mark_chromosome(new_gen[i])
+        mutation(new_gen[i])
+
+    new_gen.sort(key=lambda x: x[-1])
+    return new_gen[:gen_count]
+
+
+'''
+name, cost, kkal, prot, fat, ugl
+1                 34    36    9
+'''
 products = [
     ["Яблоко", 50, 52, 0.3, 0.2, 14],
     ["Банан", 60, 89, 1.1, 0.3, 23],
@@ -78,76 +155,27 @@ products = [
     ["Каша чечевичная", 100, 116, 9, 0.4, 20],
     ["Каша фасолевая", 100, 127, 8.7, 0.5, 22.8],
 ]
+
 panteon = []
-for product in products:
-    product.append(float('inf'))
+
 norm = [18000, 525, 500, 2000]
-gen_count = 75
-
-def crossover_one_point (chromosome1, chromosome2):
-    r = random.randint(2,3)
-    res = chromosome1
-    for i in range(int(len(chromosome1) / r)):
-        res[i] = chromosome1
-    for i in range(int(len(chromosome1) / r, len(chromosome1))):
-        res[i] = chromosome2
-    return res
+gen_count = 150
+product_count = 75
+product_count -=1
+chromosomes = []
+generation = 0
 
 
-def crossover_two_point (chromosome1, chromosome2):
-    
-    res = chromosome1
-    for i in range(len(chromosome1) / 3):
-        res[i] = chromosome1
-    for i in range(len(chromosome1) / 3, 2 * len(chromosome1) / 3):
-        res[i] = chromosome2
-
-    for i in range(2 * len(chromosome1) / 3, len(chromosome1)):
-        res[i] = chromosome1
-    return res
-
-
-
-def create_chromosome(size):
-    res = []
-    for i in range(size):
-        res.append(random.randint(0,1))
-
-    return res
-
-def mutation(chromosome):
-    for i in range(len(chromosome)):
-        if random.randint(0, 100) < 5:
-            chromosome[i] = 1
-        elif random.randint(0, 100) < 5:
-            chromosome[i] = 0
-
-#                  
-#     ["Яблоко",50,  52,    0.3, 0.2, 14]
-def fitness(chromosome):
-    kkal, cost, b, f, u = 0, 0, 0, 0,0
-
-    for i in range(len(chromosome)):
-        if chromosome[i] == 1:
-            kkal+=products[i][2]
-            cost += products[i][1]
-            b +=  products[i][3]
-            f += products[i][4]
-            u +=  products[i][5]
-    if kkal - norm[0] <= 500 and b - norm[1] <= 50 and f - norm[2] <= 50 and u - norm[3] <= 250:
-        panteon.append(chromosome)
-
-
-
-chromosome = []
-new_gen =[]
 for i in range(gen_count):
-    chromosome.append(create_chromosome(gen_count))
+    chromosomes.append(create_chromosome(gen_count))
 
 while(len(panteon) < 20):
+    generation+=1
     for i in range(gen_count):
-        fitness(chromosome[i])
-    for i in range(gen_count - 1):
-        new_gen.append(crossover_one_point(chromosome[i], chromosome[i+1]))
-    
-print(panteon)
+        mark_chromosome(chromosomes[i])
+    chromosomes = create_new_gen(chromosomes)
+
+print("\nbimbimbambam\n")
+panteon.sort(key=lambda x: x[-1])
+print(generation)
+mark_chromosome(panteon[0], True)
